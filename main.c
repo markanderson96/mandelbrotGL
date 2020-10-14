@@ -168,12 +168,12 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
         offsetX, offsetY = 0.0;
     }
     // Q for zoom in
-    if (key == GLFW_KEY_Q && action == GLFW_PRESS){
+    if (key == GLFW_KEY_Q){
         zoom *= 1.25;
         itr += 4;
     }
     // E for zoom out
-    if (key == GLFW_KEY_E && action == GLFW_PRESS){
+    if (key == GLFW_KEY_E){
         zoom /= 1.25;
         itr -= 4;
     }
@@ -202,29 +202,31 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 //void cursorCallback(GLFWwindow* window, double posX, double posY){
     // cursor callback
 //}
+
 void scrollCallback(GLFWwindow* window, double offsetX, double offsetY){
     // scroll wheel callback
     if (offsetY != 0){
         double posX, posY;
         glfwGetCursorPos(window, &posX, &posY);
 
-        double dx = (posX - WIDTH / 2) / zoom - offsetX;
-        double dy = (HEIGHT - posY - HEIGHT / 2) / zoom - offsetY;
+        double dx = (posX - WIDTH / 2) / zoom + offsetX;
+        double dy = (HEIGHT - posY - HEIGHT / 2) / zoom + offsetY;
 
         if (offsetY < 0){
             zoom /= 1.2;
-            itr /= 2;
+            itr -= 4;
         }
         else{
             zoom *= 1.2;
-            itr *= 2;
+            itr += 4;
         }
 
-        offsetX -= dx;
-        offsetY -= dy;
+        //offsetX -= dx;
+        //offsetY -= dy;
 
         glUniform1d(glGetUniformLocation(shaderProgram, "zoom"), zoom);
-		glUniform2d(glGetUniformLocation(shaderProgram, "offset"), offsetX, offsetY);
+        glUniform1i(glGetUniformLocation(shaderProgram, "itr"), itr);
+		//glUniform2d(glGetUniformLocation(shaderProgram, "offset"), offsetX, offsetY);
     }
 }
 
