@@ -2,7 +2,7 @@ BIN = mandelbrot
 CC = gcc
 FLAGS = -Wall -pedantic -O2 -DNDEBUG
 LIBS = -lGL -lglfw -lGLEW -lm
-SRC = main.c GLutils.c
+SRC = src/main.c src/GLutils.c
 
 all:
 	@echo
