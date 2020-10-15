@@ -10,7 +10,7 @@
 int WIDTH = 1920;
 int HEIGHT = 1080;
 
-int itr = 64;
+int itr = 128;
 double zoom = 400.0;
 double offsetX, offsetY = 0.0;
 double oldX, oldY = 0.0;
@@ -88,8 +88,8 @@ int main(){
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, NULL);
 
     // load shaders from files 
-    parseFile("vs.glsl", vertexShader, 1024*256);
-    parseFile("fs.glsl", fragmentShader, 1024*256);
+    parseFile("shaders/vs.glsl", vertexShader, 1024*256);
+    parseFile("shaders/fs.glsl", fragmentShader, 1024*256);
 
     // compile shaders
     // compile vertex shader
