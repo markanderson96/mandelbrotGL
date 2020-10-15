@@ -1,9 +1,9 @@
 #ifndef _GL_UTILS_H_
 #define _GL_UTILS_H_
 
+#include <stdio.h>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include <stdio.h>
 
 #define bool int
 #define true 1
@@ -19,6 +19,8 @@ bool glLog(const char* message, ...);
 bool glLogError(const char* message, ...);
 
 bool parseFile(const char* fileName, char* shaderStr, int maxLen);
+
+void updateFPS(GLFWwindow* window, const char* title);
 
 void errorCallback(int e, const char* s);
 

@@ -7,19 +7,21 @@
 #define true 1
 #define false 0
 
-int WIDTH = 1280;
-int HEIGHT = 720;
+int WIDTH = 1920;
+int HEIGHT = 1080;
 
-int itr = 32;
-double zoom = 300.0;
+int itr = 64;
+double zoom = 400.0;
 double offsetX, offsetY = 0.0;
 double oldX, oldY = 0.0;
+bool dragging = false;
 
 GLuint shaderProgram;
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void errorCallback(int e, const char* s);
-//void cursorCallback();
+void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+void cursorCallback(GLFWwindow* window, double xpos, double ypos);
 void scrollCallback(GLFWwindow* window, double offsetX, double offsetY);
 void windowSizeCallback(GLFWwindow* window, int width, int height);
 
@@ -30,6 +32,7 @@ int main(){
     GLuint vs, fs;
     const GLchar* p;
     int success = -1;
+    const char* title = "Mandelbrot Viewer";
 
     if (!glfwInit()){
         fprintf(stderr, "ERROR: could not start GLFW3\n");
@@ -41,7 +44,7 @@ int main(){
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Mandelbrot", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, title, NULL, NULL);
     if (!window){
         const char* description;
         int code = glfwGetError(&description);
@@ -53,7 +56,8 @@ int main(){
     // create callbacks
     glfwSetErrorCallback(errorCallback);
     glfwSetKeyCallback(window, keyCallback);
-    //glfwSetCursorPosCallback(window, cursorCallback);
+    glfwSetMouseButtonCallback(window, mouseButtonCallback);
+    glfwSetCursorPosCallback(window, cursorCallback);
     glfwSetScrollCallback(window, scrollCallback);
     glfwSetWindowSizeCallback(window, windowSizeCallback);
 
@@ -137,6 +141,8 @@ int main(){
 
     // main loop to draw mandelbrot
     while(!glfwWindowShouldClose(window)){
+        updateFPS(window, title);
+
         glClear(GL_COLOR_BUFFER_BIT);
 
         glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -164,18 +170,19 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     }
     if (key == GLFW_KEY_R && action == GLFW_PRESS){
         zoom = 300;
-        itr = 32;
-        offsetX, offsetY = 0.0;
+        itr = 128;
+        offsetX = 0.0; 
+        offsetY = 0.0;
     }
     // Q for zoom in
     if (key == GLFW_KEY_Q){
-        zoom *= 1.25;
-        itr += 4;
+        zoom *= 1.2;
+        itr += 16;
     }
     // E for zoom out
     if (key == GLFW_KEY_E){
-        zoom /= 1.25;
-        itr -= 4;
+        zoom /= 1.2;
+        itr -= 16;
     }
     // W up
     if (key == GLFW_KEY_W ){
@@ -193,40 +200,55 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     if (key == GLFW_KEY_D){
         offsetX -= 20 / zoom;
     }
+    if (key == GLFW_KEY_N && action == GLFW_PRESS){
+        itr -= 16;
+    }
+    if (key == GLFW_KEY_M && action == GLFW_PRESS){
+        itr += 16;
+    }
 
     glUniform1i(glGetUniformLocation(shaderProgram, "itr"), itr);
 	glUniform1d(glGetUniformLocation(shaderProgram, "zoom"), zoom);
 	glUniform2d(glGetUniformLocation(shaderProgram, "offset"), offsetX, offsetY);
 }
 
-//void cursorCallback(GLFWwindow* window, double posX, double posY){
-    // cursor callback
-//}
+void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+		glfwGetCursorPos(window, &oldX, &oldY);
+		dragging = true;
+	}
+	else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+		dragging = false;
+}
+
+void cursorCallback(GLFWwindow* window, double xpos, double ypos) {
+	if (dragging) {
+		double xpos, ypos;
+		glfwGetCursorPos(window, &xpos, &ypos);
+
+		offsetX += (xpos - oldX) / zoom;
+		offsetY += (oldY - ypos) / zoom;
+
+		oldX = xpos;
+		oldY = ypos;
+
+		glUniform2d(glGetUniformLocation(shaderProgram, "offset"), offsetX, offsetY);
+	}
+}
 
 void scrollCallback(GLFWwindow* window, double offsetX, double offsetY){
     // scroll wheel callback
     if (offsetY != 0){
-        double posX, posY;
-        glfwGetCursorPos(window, &posX, &posY);
-
-        double dx = (posX - WIDTH / 2) / zoom + offsetX;
-        double dy = (HEIGHT - posY - HEIGHT / 2) / zoom + offsetY;
-
         if (offsetY < 0){
             zoom /= 1.2;
-            itr -= 4;
+            itr -= 16;
         }
         else{
             zoom *= 1.2;
-            itr += 4;
+            itr += 16;
         }
-
-        //offsetX -= dx;
-        //offsetY -= dy;
-
         glUniform1d(glGetUniformLocation(shaderProgram, "zoom"), zoom);
         glUniform1i(glGetUniformLocation(shaderProgram, "itr"), itr);
-		//glUniform2d(glGetUniformLocation(shaderProgram, "offset"), offsetX, offsetY);
     }
 }
 

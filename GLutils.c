@@ -11,6 +11,8 @@
 
 #define GL_LOG_FILE "gl.log"
 
+static double previousSeconds;
+
 bool glLog(const char* message, ...) {
     va_list argptr;
     FILE* file = fopen(GL_LOG_FILE, "a");
@@ -62,6 +64,24 @@ bool parseFile(const char* fileName, char* shaderStr, int maxLen) {
     shaderStr[cnt] = 0;
     fclose( file );
     return true;
+}
+
+void updateFPS(GLFWwindow* window, const char* title) {
+    static int frame_count;
+    double currentSeconds = glfwGetTime();
+    double elapsedSeconds = currentSeconds - previousSeconds;
+
+    if (elapsedSeconds > 0.25) {
+        double fps;
+        char tmp[64];
+
+        previousSeconds = currentSeconds;
+        fps = (double)frame_count / elapsedSeconds;
+        sprintf( tmp, "%s fps: %.2f", title, fps);
+        glfwSetWindowTitle(window, tmp);
+        frame_count = 0;
+    }
+    frame_count++;
 }
 
 void errorCallback(int e, const char* s) {
