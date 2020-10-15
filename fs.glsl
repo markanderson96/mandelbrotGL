@@ -7,41 +7,31 @@ uniform dvec2 offset;
 
 out vec4 fragColour;
 
-double n = 0.0;
-double threshold = 100.0;
-
 double mandelbrot(dvec2 c){
     dvec2 z = vec2(0.0, 0.0);
-    for (int i = 0; i < itr; i++){
-        dvec2 temp;
+    dvec2 temp;
+    double n = 0.0;
+    while (n < itr && z.x*z.x + z.y*z.y <= 4.0){ 
         temp.x = (z.x * z.x) - (z.y * z.y) + c.x;
         temp.y = (2.0 * z.x * z.y) + c.y;
-
         z = temp;
-        if ((z.x * z.x) + (z.y * z.y) > threshold){
-            break;
-        }
         n++;
     }
-
     return n/float(itr);
 }
 
 vec4 colourMap(float t){
-    float r = 9.0 * (1.0 - t) * t * t * t;
-	float g = 15.0 * (1.0 - t) * (1.0 - t) * t * t;
-	float b = 8.5 * (1.0 - t) * (1.0 - t) * (1.0 - t) * t;
+    vec3 a = vec3(0.0,0.0,0.0);
+    vec3 b = vec3(0.59,0.55,0.75);
+    vec3 c = vec3(0.1,0.2,0.3);
+    vec3 d = vec3(0.75,0.75,0.75);
 
-    return vec4(r, g, b, 1.0);
+    vec3 RGB = a + b*cos(6.28318*(c*t+d));
+    
+    return vec4(RGB, 1.0);
 }
 
 void main(){
-    dvec2 coord = dvec2(gl_FragCoord.xy);
-    double t = mandelbrot(((coord - screenSize / 2) / zoom) - offset);
-    //if (gl_FragCoord.x < 40){
-    //    fragColour = vec4(1.0);
-    //}
-    //else {
-        fragColour = colourMap(float(t));
-    //}
+    double t = mandelbrot(((gl_FragCoord.xy - screenSize / 2) / zoom) - offset);
+    fragColour = colourMap(float(t));
 }
